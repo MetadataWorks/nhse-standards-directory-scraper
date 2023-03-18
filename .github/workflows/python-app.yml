@@ -1,0 +1,35 @@
+name: Python Scraper Application
+
+on:
+  schedule:
+  - cron: "0 0 */2 * *"    
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          ref: updated_flow
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9.16'
+        
+    - name: Create env file
+      run: |
+        touch .env
+        echo sender_email_id='metadataworksbot@outlook.com' >> .env
+        echo sender_email_password='Z0f1S29GQ4GKcrk8' >> .env
+        echo receiver_email_id='["katiewheatley@nhs.net","adam@metadataworks.co.uk"]' >> .env
+        cat .env
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Run script
+      run: api_scraper.py
