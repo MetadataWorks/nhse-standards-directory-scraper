@@ -1,0 +1,7 @@
+webdriver_manager
+selenium==4.8.2
+openpyxl
+python-decouple
+pandas
+redmail
+chromedriver-autoinstaller 
