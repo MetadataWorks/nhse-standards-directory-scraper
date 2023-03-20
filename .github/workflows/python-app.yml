@@ -32,4 +32,4 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run script
-      run: api_scraper.py
+      run: python api_scraper.py
