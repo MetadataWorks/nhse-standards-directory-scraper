@@ -33,3 +33,16 @@ jobs:
         
     - name: Run script
       run: python api_scraper.py 
+      
+    - name: commit files
+      run: |
+        git config --local user.email "scraperbot@metadataworks.co.uk"
+        git config --local user.name "David-MDW"
+        git add -A
+        git commit -m "data_updated_through_scheduler" -a
+
+    - name: push changes
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: "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"
+        branch: updated_flow
