@@ -2,9 +2,7 @@ from selenium import webdriver
 import time 
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ChromeOptions
-import chromedriver_autoinstaller
 
 
 ######   importing modules
@@ -14,15 +12,15 @@ from pyxl.pyxl import create_excel
 from change_detection.detect_data_changes import compare_current_data_with_last_scraped_data, get_last_scraped_file
 
 
-
-keys = ['Persistent ID', 'Title', 'Alternate name', 'Type', 'Abstract', 'Release date',
-        'Effective from', 'Applies to', 'Impacts on', 'Conformance date', 'Contact Point', 'Keywords',
-        'DoiName', 'Feedback', 'Alternate identifier', 'Description', 'Associated Media', 'Is Part Of',
-        'References', 'Relation', 'Publisher Identifier', 'Publisher Name', 'Publisher Logo',
-        'Publisher Description', 'Publisher Contact Point', 'Registration Status', 'Scope', 
-        'Contributor', 'Sponsor', 'SRO', 'Business Lead', 'Technical committee', 'Approval Date',	
-        'Mandate', 'Legal authority',' Endorsed by', 'License', 'Post implementation review date', 
-        'Reviews', 'Data Status', 'Data Access']
+''' this is the previous order of keys '''
+# keys = ['Persistent ID', 'Title', 'Alternate name', 'Type', 'Abstract', 'Release date',
+#         'Effective from', 'Applies to', 'Impacts on', 'Conformance date', 'Contact Point', 'Keywords',
+#         'DoiName', 'Feedback', 'Alternate identifier', 'Description', 'Associated Media', 'Is Part Of',
+#         'References', 'Relation', 'Publisher Identifier', 'Publisher Name', 'Publisher Logo',
+#         'Publisher Description', 'Publisher Contact Point', 'Registration Status', 'Scope', 
+#         'Contributor', 'Sponsor', 'SRO', 'Business Lead', 'Technical committee', 'Approval Date',	
+#         'Mandate', 'Legal authority',' Endorsed by', 'License', 'Post implementation review date', 
+#         'Reviews', 'Data Status', 'Data Access']
 
 
 absolute_keywords = ['community health', 'dentistry', 'hospital','a&e / emergency department', 
@@ -39,14 +37,9 @@ def scrape_apis():
     try:
         options = ChromeOptions()
         options.add_argument("--headless")
-        print("INSTALLING DRIVER")
-        chromedriver_autoinstaller.install()  # Check if the current version of chromedriver exists
-                                            # and if it doesn't exist, download it automatically,
-                                            # then add chromedriver to path
-        print("driver installed")
 
-        driver = webdriver.Chrome(options = options)
-
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        driver.maximize_window()
 
         driver.get('https://digital.nhs.uk/developer/api-catalogue')
         time.sleep(2)
@@ -55,8 +48,7 @@ def scrape_apis():
         try:
             driver.find_element(By.ID, 'CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection').click()
             time.sleep(2)
-            print('accpeted cookies')
-
+            print('accepted cookies')
 
         except:
             print("couldn't find accept cookies button")
@@ -86,26 +78,31 @@ def scrape_apis():
                 
                 try:
                     api_url = api_heading.get_attribute('href')
-                    api_entry[keys[0]] = api_url
+                    api_entry['Persistent ID'] = api_url
                 except:
-                    api_entry[keys[0]] = 'NA'
+                    api_entry['Persistent ID'] = 'NA'
                 
                 try:
                     api_title = api_heading.text
-                    api_entry[keys[1]] = api_title
+                    api_entry['Title'] = api_title
                 except:
-                    api_entry[keys[1]] = "NA"
+                    api_entry['Title'] = "NA"
                 
 
                 try:
-                    api_entry[keys[2]] = 'NA'
-                    api_entry[keys[3]] = 'Technical standards and specifications'
-                    api_entry[keys[4]] = 'NA'
-                    api_entry[keys[5]] = 'NA'
-                    api_entry[keys[6]] = 'NA'
+                    api_entry['Type'] = 'Technical_standards_and_specifications'
+                    api_entry['Abstract'] = 'NA'
+
+
+                    api_entry['Contact Point'] = "api.management@nhs.net"
+
+                    if api_title == "Care Connect FHIR API standards":
+                        api_entry['Contact Point'] = 'admin@interopen.org'
+
+                    if api_title == "HL7 FHIR UK Core":
+                        api_entry['Contact Point'] = 'secretariat@hl7.org.uk'
                     
 
-                    api_entry[keys[7]] = 'NA' 
                     keyword_tags = []
                     try:
                         keyword_tags = api.find_elements(By.CLASS_NAME, 'nhsd-a-tag--bg-light-grey')
@@ -113,36 +110,35 @@ def scrape_apis():
                     except:
                         print(f"couldn't find keyword tags in this api entry ({api_title})")
                     
+                    api_entry['Keywords'] = ', '.join(keyword_tags)
 
+
+                    api_entry['Release date'] = 'NA'
+                    api_entry['Effective from'] = 'NA'
+                    
+
+                    api_entry['Applies to'] = 'NA' 
                     for tag in keyword_tags:
                         if tag.lower() in absolute_keywords:
-                            api_entry[keys[7]] = tag
+                            api_entry['Applies to'] = tag
                             break
 
 
-                    api_entry[keys[8]] = 'NA'
-                    api_entry[keys[9]] = 'NA'
+                    api_entry['Impacts on'] = 'NA'
+                    api_entry['Conformance date'] = 'NA'
+
+                    api_entry['DoiName'] = 'NA'
+                    api_entry['Alternate name'] = 'NA'
 
 
-                    api_entry[keys[10]] = "api.management@nhs.net"
-
-                    if api_title == "Care Connect FHIR API standards":
-                        api_entry[keys[10]] = 'admin@interopen.org'
-
-                    if api_title == "HL7 FHIR UK Core":
-                        api_entry[keys[10]] = 'secretariat@hl7.org.uk'
-                    
-
-                    api_entry[keys[11]] = ', '.join(keyword_tags)
-                    api_entry[keys[12]] = 'NA'
-                    api_entry[keys[13]] = 'NA'
-                    api_entry[keys[14]] = 'NA'
+                    # api_entry['Feedback'] = 'NA'
+                    # api_entry['Alternate identifier'] = 'NA'
 
 
                     try:
-                        api_entry[keys[15]] = api.find_element(By.TAG_NAME, 'p').text
+                        api_entry['Description'] = api.find_element(By.TAG_NAME, 'p').text
                     except:
-                        api_entry[keys[15]] = 'NA'
+                        api_entry['Description'] = 'NA'
                     
 
                     status_tags = []
@@ -182,62 +178,70 @@ def scrape_apis():
                     
                     if structure_1 == True:
                         print('page structure: 1')
-                        api_entry = page_structure_1(driver, api_entry, keys)
+                        api_entry = page_structure_1(driver, api_entry)
 
                     else:
                         print('page structure: 2')
-                        api_entry = page_structure_2(driver, api_entry, keys)
+                        api_entry = page_structure_2(driver, api_entry)
 
 
                     driver.back()
                     driver.refresh()
-                    time.sleep(3)
+                    time.sleep(1)
                     print('back to homepage')
 
 
                     ####     defaults
-                    api_entry[keys[20]] = 'https://ror.org/03am1eg44'
-                    api_entry[keys[21]] = "NHS Digital"
-                    api_entry[keys[22]] = 'https://nhs-prod.global.ssl.fastly.net/webfiles/1676894911965/images/nhs-digital-logo-social.jpg'
-                    api_entry[keys[23]] = 'https://digital.nhs.uk/'
-                    api_entry[keys[24]] = 'mailto:api.management@nhs.net'
+                    api_entry['Publisher Identifier'] = 'https://ror.org/03am1eg44'
+                    api_entry['Publisher Name'] = "NHS Digital"
+                    api_entry['Publisher Description'] = 'https://digital.nhs.uk/'
+                    api_entry['Publisher Contact Point'] = 'api.management@nhs.net'
+                    api_entry['Publisher Logo'] = 'https://nhs-prod.global.ssl.fastly.net/webfiles/1676894911965/images/nhs-digital-logo-social.jpg'
                     
-
+                    
                     if api_title == "Care Connect FHIR API standards":
-                        api_entry[keys[20]] = 'https://twitter.com/INTEROPenAPI'
-                        api_entry[keys[21]] = 'INTEROPen'
-                        api_entry[keys[22]] = 'https://pbs.twimg.com/profile_banners/731591066516885508/1498660571/1500x500'
-                        api_entry[keys[23]] = 'https://twitter.com/INTEROPenAPI'
-                        api_entry[keys[24]] = ' admin@interopen.org'
-                    
+                        api_entry['Publisher Identifier'] = 'https://twitter.com/INTEROPenAPI'
+                        api_entry['Publisher Name'] = 'INTEROPen'
+                        api_entry['Publisher Description'] = 'https://twitter.com/INTEROPenAPI'
+                        api_entry['Publisher Contact Point'] = 'admin@interopen.org'
+                        api_entry['Publisher Logo'] = 'https://pbs.twimg.com/profile_banners/731591066516885508/1498660571/1500x500'
+                        
 
                     elif api_title == "HL7 FHIR UK Core":
-                        api_entry[keys[20]] = 'https://www.hl7.org.uk/'
-                        api_entry[keys[21]] = 'HL7 UK'
-                        api_entry[keys[22]] = 'https://www.hl7.org.uk/wp-content/uploads/HL7UK_Media/Images/Pale_red_hl7_logo_2019-25-percent-2.jpg'
-                        api_entry[keys[23]] = 'https://www.hl7.org.uk/register/about-hl7-uk/hl7-uk/'
-                        api_entry[keys[24]] = 'mailto:secretariat@hl7.org.uk'
-                    
-
-
-                    api_entry[keys[25]] = 'NA'
-                    
-                    if status_tags != []:
-                        api_entry[keys[25]] = ', '.join(status_tags)
-                
+                        api_entry['Publisher Identifier'] = 'https://www.hl7.org.uk/'
+                        api_entry['Publisher Name'] = 'HL7 UK'
+                        api_entry['Publisher Description'] = 'https://www.hl7.org.uk/register/about-hl7-uk/hl7-uk/'
+                        api_entry['Publisher Contact Point'] = 'secretariat@hl7.org.uk'
+                        api_entry['Publisher Logo'] = 'https://www.hl7.org.uk/wp-content/uploads/HL7UK_Media/Images/Pale_red_hl7_logo_2019-25-percent-2.jpg'
+                        
 
                     
                     ## setting NA from field#26 to field#38
-                    for i in range(26, 39):
-                        api_entry[keys[i]] = 'NA'
+                    for i in ['Scope', 'Contributor', 'Sponsor', 'SRO', 'Business Lead', 'Technical committee', 
+                              'Approval Date', 'Post implementation review date']:
+                        
+                        api_entry[i] = 'NA'
                     
-                    api_entry[keys[39]] = 'None'   #### template has None in field 40
+
+                    api_entry['Registration Status'] = 'NA'
+                    
+                    if status_tags != []:
+                        api_entry['Registration Status'] = ', '.join(status_tags)
+                
+
+                    for i in ['Registration authority', 'Status', 'Mandated', 'Trusted by', 'Reviews', 'Legal authority']:
+
+                        api_entry[i] = 'NA'
+                        
+
+
+                    api_entry['Data Status'] = 'External'   #### template has None in field 40
 
 
                     if 'api_url' in locals():
-                        api_entry[keys[40]] = api_url
+                        api_entry['Data Access'] = api_url
                     else:
-                        api_entry[keys[40]] = 'NA'
+                        api_entry['Data Access'] = 'NA'
                     
 
                     api_data.append(api_entry)
@@ -253,7 +257,7 @@ def scrape_apis():
                 api_entries = driver.find_elements(By.CSS_SELECTOR,'div[data-api-catalogue-entry]')
                 
 
-                # if api_num==1:
+                # if api_num==2:
                 #     break
 
 
@@ -268,7 +272,7 @@ def scrape_apis():
                     ## first getting the last saved file cause the current file is going to be created in the next line
                     last_scraped_data_file = get_last_scraped_file()
 
-                    data_file, current_comparison_file = create_excel(api_data, keys)
+                    data_file, current_comparison_file = create_excel(api_data)
                     print('successfully saved APIs data at: ', data_file)
 
                     print('last_scraped_data_file: ', last_scraped_data_file)

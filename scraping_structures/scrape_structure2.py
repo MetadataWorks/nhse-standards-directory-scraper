@@ -4,15 +4,16 @@ from selenium.webdriver.common.by import By
 
 
 
-def page_structure_2(driver, api_entry, keys):
+def page_structure_2(driver, api_entry):
 
 
     ###   setting default to NA, incase we go in except block, we'll return NA
 
-    api_entry[keys[16]] = 'NA'
-    api_entry[keys[17]] = 'NA'
-    api_entry[keys[18]] = 'NA'
-    api_entry[keys[19]] = 'NA'
+    api_entry['Associated Media'] = 'NA'
+    api_entry['Is Part Of'] = 'NA'
+    # api_entry['References'] = 'NA'
+    api_entry['Dependency'] = 'NA'
+    api_entry['Relation'] = 'NA'
 
 
     try:
@@ -80,7 +81,7 @@ def page_structure_2(driver, api_entry, keys):
 
             if media_links!=[]:
                 print('media_links: ', media_links)
-                api_entry[keys[16]] = ', '.join(media_links)
+                api_entry['Associated Media'] = ', '.join(media_links)
         
 
 
@@ -145,7 +146,7 @@ def page_structure_2(driver, api_entry, keys):
 
             if tech_urls!=[]:
                 print('tech_urls: ', tech_urls)
-                api_entry[keys[18]] = ', '.join(tech_urls)
+                api_entry['Dependency'] = ', '.join(tech_urls)
         
 
 
@@ -197,7 +198,7 @@ def page_structure_2(driver, api_entry, keys):
 
                 if rel_api_urls != []:
                     print('rel_api_urls: ',rel_api_urls)
-                    api_entry[keys[19]] = ', '.join(rel_api_urls)
+                    api_entry['Relation'] = ', '.join(rel_api_urls)
 
             except:
                 print("couldnot find any url in related_apis")
