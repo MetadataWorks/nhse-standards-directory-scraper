@@ -24,7 +24,7 @@ jobs:
         touch .env
         echo sender_email_id='metadataworksbot@outlook.com' >> .env
         echo sender_email_password='Z0f1S29GQ4GKcrk8' >> .env
-        echo receiver_email_id='["katiewheatley@nhs.net","adam@metadataworks.co.uk"]' >> .env
+        echo receiver_email_id='["katiewheatley@nhs.net","adam@metadataworks.co.uk","bharat.sharma4@nhs.net"]' >> .env
         cat .env
         
     - name: Install dependencies
